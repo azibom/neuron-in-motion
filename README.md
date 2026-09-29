@@ -2,6 +2,8 @@
 
 An interactive browser presentation for **Assignment 0 · Part 2: The Neuron and Neural Activity**.
 
+**Live presentation:** [azibom.github.io/neuron-in-motion](https://azibom.github.io/neuron-in-motion/)
+
 The experience begins with a conceptual neuron simulator, then opens a ten-slide, approximately ten-minute presentation explaining:
 
 1. how graded input becomes discrete spike timing;
@@ -61,4 +63,3 @@ The complete selected bibliography is included in the website.
 ## License
 
 Code and original diagrams are released under the MIT License. Linked publications retain their respective copyrights. No figures from the cited sources are redistributed.
-
