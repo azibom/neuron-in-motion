@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f1eee6" />
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta name="description" content="An interactive neuron simulator and ten-slide presentation on neural activity." />
+    <title>Neuron in Motion</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="styles.css?v=20260930.1" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to the experience</a>
+
+    <header class="topbar">
+      <a class="brand" href="#" aria-label="Neuron in Motion home">
+        <span class="brand-signal" aria-hidden="true"><i></i></span>
+        <span>Neuron<br /><b>in Motion</b></span>
+      </a>
+      <nav aria-label="Primary navigation">
+        <span id="phaseLabel">Interactive primer</span>
+        <a id="presentationLink" href="#presentation">Presentation</a>
+        <button id="referencesButton" type="button">References</button>
+        <button id="aboutButton" type="button">About</button>
+      </nav>
+    </header>
+
+    <main id="main">
+      <section class="screen intro is-active" id="introScreen" aria-labelledby="introTitle">
+        <div class="intro-copy">
+          <p class="kicker"><span>Assignment 0 · Part 2</span> a 10-minute neural journey</p>
+          <h1 id="introTitle">A neuron is not a wire.<br />It is a decision made in voltage.</h1>
+          <p class="lede">Give it input. Watch voltage integrate. Cross the threshold—and follow one spike from dendrite to synapse.</p>
+          <div class="intro-actions">
+            <button class="button button-primary" id="openLabButton" type="button">Enter the neuron lab <span>→</span></button>
+            <button class="button button-ghost" id="introPresentationButton" type="button">Open the 10 slides</button>
+          </div>
+          <p class="duration">A two-minute interactive primer · then a referenced presentation · no backend</p>
+        </div>
+
+        <div class="hero-neuron" aria-label="Animated neuron receiving inputs and sending an axonal signal">
+          <svg viewBox="0 0 760 590" role="img" aria-labelledby="heroNeuronTitle">
+            <title id="heroNeuronTitle">A stylized neuron with dendrites, soma, axon and synaptic terminals</title>
+            <g class="dendrites">
+              <path d="M293 292C232 238 205 178 160 122M234 247C175 251 125 226 75 190M235 328C165 346 127 397 78 438M284 362C248 425 245 473 215 526" />
+              <path d="M169 124l-55-23m48 21l-12-57M76 190l-44-39m44 40l-57 12M79 438l-51 26m51-25l-34 55M215 525l-42 38m42-38l18 52" />
+            </g>
+            <path class="soma" d="M247 277c8-74 82-115 153-84 60 26 77 106 36 157-44 55-139 51-177-7-13-20-16-42-12-66Z" />
+            <circle class="nucleus" cx="346" cy="286" r="46" />
+            <path class="axon" d="M438 315C515 324 519 386 582 382c46-3 63-42 103-30" />
+            <g class="myelin"><path d="M470 332c26 10 38 24 48 39"/><path d="M532 380c20 8 39 6 54-2"/><path d="M608 368c20-14 36-22 51-20"/></g>
+            <g class="terminals"><path d="M683 352l40-40m-38 40l51 3m-52-2l34 42"/><circle cx="726" cy="307" r="13"/><circle cx="741" cy="356" r="13"/><circle cx="721" cy="398" r="13"/></g>
+            <g class="hero-inputs"><circle cx="159" cy="122" r="9"/><circle cx="76" cy="190" r="9"/><circle cx="79" cy="438" r="9"/></g>
+            <circle class="hero-spike" r="13"><animateMotion dur="2.8s" repeatCount="indefinite" path="M270 290 C360 280 410 310 438 315 C515 324 519 386 582 382 C630 378 655 347 703 342" /></circle>
+          </svg>
+          <div class="hero-labels"><span style="--x:11%;--y:17%">input</span><span style="--x:43%;--y:42%">integrate</span><span style="--x:69%;--y:68%">propagate</span><span style="--x:88%;--y:48%">transmit</span></div>
+        </div>
+      </section>
+
+      <section class="screen lab" id="labScreen" aria-labelledby="labTitle">
+        <header class="lab-head">
+          <div><p class="kicker">Interactive neuron lab</p><h2 id="labTitle">Can you make it fire twice?</h2></div>
+          <div class="lab-status"><span>membrane potential</span><strong id="voltageReadout">−70.0 mV</strong></div>
+        </header>
+
+        <div class="lab-grid">
+          <div class="lab-neuron-panel">
+            <canvas id="neuronCanvas" width="820" height="560" aria-label="Animated neuron showing inputs and action-potential propagation"></canvas>
+            <div class="threshold-badge"><span>threshold</span><b>−55 mV</b></div>
+            <p class="lab-message" id="labMessage" aria-live="polite">Try three quick excitatory inputs. Spacing matters.</p>
+          </div>
+
+          <div class="lab-trace-panel">
+            <div class="trace-heading"><span>membrane voltage</span><span>last 4 seconds</span></div>
+            <canvas id="traceCanvas" width="820" height="340" aria-label="Live membrane-potential trace from minus 80 to plus 40 millivolts"></canvas>
+            <div class="spike-counter"><span>spikes generated</span><b id="spikeCount">0</b><i id="spikeDots" aria-hidden="true"></i></div>
+          </div>
+        </div>
+
+        <div class="lab-controls">
+          <button class="input-button excitatory" id="exciteButton" type="button"><span>E</span><b>Excitatory input</b><small>depolarize +6 mV</small></button>
+          <button class="input-button inhibitory" id="inhibitButton" type="button"><span>I</span><b>Inhibitory input</b><small>hyperpolarize −5 mV</small></button>
+          <label class="drive-control" for="driveSlider"><span><b>Tonic drive</b><output id="driveOutput">0.0</output></span><input id="driveSlider" type="range" min="0" max="18" step="0.5" value="0" /><small>Raise sustained input and watch firing rate change.</small></label>
+          <button class="reset-button" id="resetLab" type="button">Reset</button>
+        </div>
+        <p class="model-note">Conceptual leaky integrate-and-fire simulation with an illustrative spike waveform—not a full Hodgkin–Huxley membrane model. <button type="button" data-popover="model">Model details</button></p>
+        <div class="lab-complete" id="labComplete" hidden>
+          <div><p class="kicker">Threshold crossed</p><h3>You turned graded input into a spike train.</h3><p>The spike amplitude stayed roughly fixed; input changed <em>when</em> spikes occurred. That distinction leads directly to neural activity.</p></div>
+          <button class="button button-primary" id="enterDeckButton" type="button">Explain it in 10 slides <span>→</span></button>
+        </div>
+      </section>
+
+      <section class="deck" id="deck" aria-label="Ten-slide presentation on neurons and neural activity" hidden>
+        <div class="deck-progress"><span id="deckProgress"></span></div>
+
+        <article class="slide is-current" data-slide="0" data-label="From input to spike">
+          <div class="slide-index">01</div>
+          <div class="slide-copy">
+            <p class="kicker">Start with the transformation</p>
+            <h2>Many small inputs.<br />One discrete output.</h2>
+            <p class="slide-lede" id="personalSpikeText">A neuron integrates graded changes in membrane voltage. If that evolving state reaches threshold, it generates an action potential.</p>
+            <div class="transform-line"><span>graded input</span><i>→</i><span>integration</span><i>→</i><span>spike timing</span></div>
+            <button class="citation" type="button" data-reference="1">Purves et al. · Neuroscience [1]</button>
+          </div>
+          <div class="slide-visual mini-lab">
+            <canvas id="miniTraceCanvas" width="720" height="470" aria-label="Animated trace showing inputs summating to trigger an action potential"></canvas>
+            <div class="mini-threshold">threshold</div>
+          </div>
+          <aside class="speaker-note"><b>Speaker note · ~45 s</b><p>Open with the demo: each excitatory event was too small alone, but close inputs summed before the membrane leaked back to rest. Crossing threshold converted an analog state into a stereotyped event. This input–state–event transformation is the conceptual spine of the talk.</p></aside>
+        </article>
+
+        <article class="slide" data-slide="1" data-label="Anatomy is computation">
+          <div class="slide-index">02</div>
+          <div class="slide-copy compact">
+            <p class="kicker">What is a neuron?</p>
+            <h2>A polarized cell whose geometry shapes information flow.</h2>
+            <p class="slide-lede">Dendrites receive and transform input; the soma and axon initial segment integrate it; the axon carries output; terminals influence other cells.</p>
+            <aside class="claim-box"><b>Important</b><span>This is a useful canonical map—not a claim that every neuron has the same shape or one-way simplicity.</span></aside>
+            <button class="citation" type="button" data-reference="1">Purves et al. [1]</button>
+          </div>
+          <div class="slide-visual anatomy-visual" aria-label="Neuron anatomy diagram">
+            <svg viewBox="0 0 760 520" role="img"><title>Canonical neuron anatomy</title>
+              <g class="anatomy-dendrite"><path d="M260 265C205 211 174 163 118 115M221 239C158 244 101 217 57 177M222 312C161 334 111 383 69 430M270 345C246 413 228 449 194 495"/><path d="M120 116L72 79m49 37l5-66M57 177L18 147m39 30L6 194M70 430l-50 24m50-24l-24 55M194 495l-35 20"/></g>
+              <path class="anatomy-soma" d="M225 257c10-66 81-105 143-75 56 27 67 101 26 148-42 48-129 43-160-14-10-18-13-39-9-59Z"/><circle class="anatomy-nucleus" cx="319" cy="268" r="39"/>
+              <path class="anatomy-axon" d="M398 294C474 300 489 355 546 348c49-6 75-50 132-31"/>
+              <g class="anatomy-myelin"><path d="M430 307l43 26"/><path d="M485 351l49 0"/><path d="M557 344l45-22"/></g><g class="anatomy-terminal"><path d="M674 317l47-31m-45 32l52 12m-52-12l35 43"/><circle cx="725" cy="283" r="10"/><circle cx="733" cy="331" r="10"/><circle cx="713" cy="365" r="10"/></g>
+              <g class="anatomy-labels"><text x="45" y="84">dendrites</text><text x="278" y="160">soma</text><text x="400" y="275">axon initial segment</text><text x="519" y="390">axon + myelin</text><text x="626" y="272">terminals</text></g>
+            </svg>
+          </div>
+          <aside class="speaker-note"><b>Speaker note · ~50 s</b><p>A neuron is a cell, not an abstract node. Its extended geometry matters: synapses at different dendritic locations are filtered differently, the initial segment is specialized for spike initiation, and terminals turn electrical events into effects on downstream cells.</p></aside>
+        </article>
+
+        <article class="slide" data-slide="2" data-label="Voltage across a membrane">
+          <div class="slide-index">03</div>
+          <div class="slide-copy compact">
+            <p class="kicker">The physical state</p>
+            <h2>Voltage is separated charge across a very thin membrane.</h2>
+            <p class="slide-lede">Ion concentration gradients provide electrochemical driving forces. Selective channels set conductance; the membrane stores charge like a capacitor. Rest is a dynamic steady state, not “off.”</p>
+            <div class="rest-fact"><strong>≈ −70 mV</strong><span>a useful textbook value—not universal across cells or moments</span></div>
+            <button class="citation" type="button" data-reference="2">Hodgkin & Huxley [2]</button>
+          </div>
+          <div class="slide-visual membrane-visual" aria-label="Membrane with sodium and potassium ions and selective channels">
+            <div class="ion-space outside"><span>outside</span><i class="ion na">Na⁺</i><i class="ion na">Na⁺</i><i class="ion cl">Cl⁻</i><i class="ion ca">Ca²⁺</i></div>
+            <div class="membrane-band"><i></i><i></i><i class="channel na-channel">Na⁺ channel</i><i></i><i class="channel k-channel">K⁺ channel</i><i></i></div>
+            <div class="ion-space inside"><span>inside</span><i class="ion k">K⁺</i><i class="ion k">K⁺</i><i class="ion a">A⁻</i><i class="ion k">K⁺</i></div>
+            <div class="voltage-bracket"><b>V<sub>m</sub></b><span>inside relative to outside</span></div>
+          </div>
+          <aside class="speaker-note"><b>Speaker note · ~60 s</b><p>The lipid bilayer separates charge, so electrically it behaves like a capacitor. Ion gradients act like batteries, and channels act like voltage- or ligand-controlled conductances. The sodium–potassium pump maintains gradients over time, but the moment-to-moment resting voltage is dominated by selective permeability, especially to potassium.</p></aside>
+        </article>
+
+        <article class="slide" data-slide="3" data-label="Integration">
+          <div class="slide-index">04</div>
+          <div class="slide-copy compact">
+            <p class="kicker">Computation before the spike</p>
+            <h2>Inputs add, cancel, decay—and interact in space and time.</h2>
+            <p class="slide-lede">Excitatory postsynaptic potentials can depolarize; inhibitory inputs can reduce firing probability. Repeated nearby events sum temporally; distributed inputs sum spatially.</p>
+            <button class="citation" type="button" data-reference="3">Alberts et al. · NCBI Bookshelf [3]</button>
+          </div>
+          <div class="slide-visual integration-visual">
+            <div class="input-lanes"><span><i class="epsp"></i>EPSP A</span><span><i class="epsp delay"></i>EPSP B</span><span><i class="ipsp"></i>IPSP</span></div>
+            <svg viewBox="0 0 700 360" role="img" aria-label="Excitatory and inhibitory postsynaptic potentials summating over time"><line x1="45" y1="80" x2="670" y2="80" class="threshold-line"/><text x="560" y="67">threshold</text><line x1="45" y1="280" x2="670" y2="280" class="rest-line"/><text x="590" y="302">rest</text><path class="sum-trace" d="M45 280C90 280 98 230 135 225S170 279 208 280C240 280 250 222 288 210S328 265 350 264C383 262 386 314 422 312S468 276 498 276C530 276 545 187 574 151S607 83 670 82"/></svg>
+            <p>integration changes probability and timing—not merely a binary sum.</p>
+          </div>
+          <aside class="speaker-note"><b>Speaker note · ~55 s</b><p>Subthreshold potentials are graded and leaky. Their effect depends on sign, timing, dendritic location and ongoing conductances. “Excitatory” and “inhibitory” describe effects in context; inhibition can shunt current without producing a large negative voltage deflection.</p></aside>
+        </article>
+
+        <article class="slide" data-slide="4" data-label="Action potential">
+          <div class="slide-index">05</div>
+          <div class="slide-copy compact">
+            <p class="kicker">A regenerative event</p>
+            <h2>Threshold recruits channels that create the spike.</h2>
+            <p class="slide-lede">Voltage-gated Na⁺ conductance drives rapid depolarization. Na⁺ channel inactivation and delayed K⁺ conductance repolarize the membrane. Refractoriness constrains the next spike.</p>
+            <button class="citation" type="button" data-reference="4">Bean · Nature Reviews Neuroscience [4]</button>
+          </div>
+          <div class="slide-visual action-potential">
+            <svg viewBox="0 0 760 470" role="img" aria-label="Action potential phases and ion-channel states"><line x1="55" y1="390" x2="720" y2="390"/><line x1="55" y1="55" x2="55" y2="390"/><line x1="55" y1="284" x2="720" y2="284" class="ap-threshold"/><text x="625" y="274">threshold</text><path class="ap-path" d="M55 345C145 345 179 340 225 329C249 323 260 302 278 284C294 268 306 95 333 77C355 63 370 119 382 177C395 246 432 318 492 355C535 380 572 343 720 345"/><g class="ap-labels"><text x="72" y="375">rest</text><text x="236" y="247">depolarize</text><text x="353" y="124">peak</text><text x="405" y="236">repolarize</text><text x="485" y="386">afterhyperpolarization</text></g></svg>
+            <div class="channel-timeline"><span><i class="na-open"></i><b>Na⁺</b> opens fast, then inactivates</span><span><i class="k-open"></i><b>K⁺</b> opens later</span></div>
+          </div>
+          <aside class="speaker-note"><b>Speaker note · ~60 s</b><p>The spike is not electricity injected at one end of a cable. It is a local regenerative change in membrane conductance. The classic Na/K story captures the core mechanism, but mammalian neurons express many channel types and therefore show diverse spike shapes, bursts and adaptation.</p></aside>
+        </article>
+
+        <article class="slide" data-slide="5" data-label="Propagation">
+          <div class="slide-index">06</div>
+          <div class="slide-copy compact">
+            <p class="kicker">The signal travels by regeneration</p>
+            <h2>The action potential does not fade down the axon.</h2>
+            <p class="slide-lede">Local current depolarizes the next membrane segment. Myelin reduces current loss; concentrated channels at nodes of Ranvier regenerate the spike, enabling rapid saltatory conduction.</p>
+            <button class="citation" type="button" data-reference="5">Debanne et al. [5] · Lubetzki et al. [6]</button>
+          </div>
+          <div class="slide-visual propagation-visual" aria-label="Animated action potential moving between nodes of Ranvier">
+            <div class="axon-line"><i class="myelin-segment"></i><b class="node"></b><i class="myelin-segment"></i><b class="node"></b><i class="myelin-segment"></i><b class="node"></b><i class="myelin-segment"></i><span class="traveling-spike"></span></div>
+            <div class="propagation-labels"><span>myelin</span><span>node</span><span>local current</span><span>regeneration</span></div>
+            <div class="compare-conduction"><div><span>unmyelinated</span><i class="slow-pulse"></i></div><div><span>myelinated</span><i class="fast-pulse"></i></div></div>
+          </div>
+          <aside class="speaker-note"><b>Speaker note · ~50 s</b><p>An action potential keeps its amplitude because each segment regenerates it. Myelin changes the cable properties of the axon, and nodes cluster the channels needed for regeneration. “Jumping” is a useful shorthand—the intervening current still spreads continuously under the myelin.</p></aside>
+        </article>
+
+        <article class="slide" data-slide="6" data-label="Synapse">
+          <div class="slide-index">07</div>
+          <div class="slide-copy compact">
+            <p class="kicker">Electrical → chemical → electrical</p>
+            <h2>A spike becomes a probability of release—and a new postsynaptic current.</h2>
+            <p class="slide-lede">At a chemical synapse: depolarization opens Ca²⁺ channels; calcium triggers vesicle fusion; transmitter binds receptors; postsynaptic conductance changes.</p>
+            <button class="citation" type="button" data-reference="7">Südhof · Neuron [7]</button>
+          </div>
+          <div class="slide-visual synapse-visual" aria-label="Animated chemical synapse">
+            <div class="pre-terminal"><span>presynaptic terminal</span><i class="vesicle v1"></i><i class="vesicle v2"></i><i class="vesicle v3"></i><b class="calcium">Ca²⁺</b></div>
+            <div class="cleft"><i></i><i></i><i></i><span>synaptic cleft</span></div>
+            <div class="post-membrane"><span>postsynaptic cell</span><i class="receptor"></i><i class="receptor"></i><i class="receptor"></i></div>
+            <div class="synapse-steps"><span><b>1</b>spike arrives</span><span><b>2</b>Ca²⁺ enters</span><span><b>3</b>vesicle fuses</span><span><b>4</b>receptors respond</span></div>
+          </div>
+          <aside class="speaker-note"><b>Speaker note · ~60 s</b><p>A chemical synapse is not a perfect relay. Release can be probabilistic, receptor types differ, and synaptic strength changes over milliseconds to years. The sign of a synapse depends on the receptor and ionic reversal potential—not simply on the neurotransmitter’s name.</p></aside>
+        </article>
+
+        <article class="slide" data-slide="7" data-label="What is neural activity?">
+          <div class="slide-index">08</div>
+          <div class="slide-copy compact">
+            <p class="kicker">A phrase with many measurements</p>
+            <h2>“Neural activity” is not one observable.</h2>
+            <p class="slide-lede">It may mean membrane voltage, spikes, firing rate, calcium fluorescence, synaptic currents, local field potential, EEG—or a hemodynamic proxy such as BOLD fMRI.</p>
+            <aside class="claim-box"><b>Rule</b><span>Always ask: activity of what, measured how, at what spatial and temporal scale?</span></aside>
+            <button class="citation" type="button" data-reference="8">Buzsáki et al. [8] · Grienberger & Konnerth [9]</button>
+          </div>
+          <div class="slide-visual scale-ladder">
+            <div><span>µm · ms</span><b>membrane potential</b><i class="tiny-trace"></i></div>
+            <div><span>single cells</span><b>spikes / calcium</b><i class="spike-raster"></i></div>
+            <div><span>local populations</span><b>LFP / ECoG</b><i class="wave-trace"></i></div>
+            <div><span>cm · seconds</span><b>EEG / BOLD</b><i class="bold-trace"></i></div>
+          </div>
+          <aside class="speaker-note"><b>Speaker note · ~65 s</b><p>Different techniques do not record interchangeable versions of the same thing. Calcium imaging is an indirect and temporally filtered proxy for intracellular calcium; LFP and EEG reflect summed transmembrane currents shaped by geometry and synchrony; BOLD reflects vascular responses. Interpretation begins with the measurement model.</p></aside>
+        </article>
+
+        <article class="slide" data-slide="8" data-label="From spikes to codes">
+          <div class="slide-index">09</div>
+          <div class="slide-copy compact">
+            <p class="kicker">Activity becomes a pattern</p>
+            <h2>Information can live in rate, timing, and population structure.</h2>
+            <p class="slide-lede">A single spike is rarely the whole message. Neuroscience studies spike counts, precise timing, bursts, synchrony, correlations and trajectories across many neurons.</p>
+            <button class="citation" type="button" data-reference="10">Dayan & Abbott [10] · Panzeri et al. [11]</button>
+          </div>
+          <div class="slide-visual coding-visual">
+            <div class="raster" id="populationRaster" aria-label="Spike raster from twelve neurons"></div>
+            <div class="code-views"><span><b>rate</b> how many?</span><span><b>timing</b> exactly when?</span><span><b>population</b> which ensemble?</span></div>
+            <div class="population-state"><i></i><i></i><i></i><i></i><i></i><span>state evolves through a neural population</span></div>
+          </div>
+          <aside class="speaker-note"><b>Speaker note · ~55 s</b><p>There is no single universal neural code. Which feature matters depends on the circuit, behavior and readout timescale. At the population level, correlations can help or hurt information depending on how they align with stimulus-related dimensions.</p></aside>
+        </article>
+
+        <article class="slide" data-slide="9" data-label="A computable cell">
+          <div class="slide-index">10</div>
+          <div class="slide-copy finale">
+            <p class="kicker">The computational bridge</p>
+            <h2>A neuron is a dynamical system—not a binary switch.</h2>
+            <p class="slide-lede">Its state evolves through time; inputs change conductances; nonlinear thresholds create events; history changes future responsiveness. Models choose which of these details matter for the question.</p>
+            <div class="model-spectrum"><span><b>integrate-and-fire</b> timing and networks</span><i>→</i><span><b>Hodgkin–Huxley</b> ionic mechanisms</span><i>→</i><span><b>multicompartment</b> morphology and dendrites</span></div>
+            <div class="source-links"><button id="openReferencesFromSlide" type="button">Full references</button><a href="https://doi.org/10.1113/jphysiol.1952.sp004764" target="_blank" rel="noreferrer">Hodgkin–Huxley ↗</a><a href="https://mitpress.mit.edu/9780262541855/theoretical-neuroscience/" target="_blank" rel="noreferrer">Computational text ↗</a></div>
+          </div>
+          <div class="slide-visual finale-system" aria-hidden="true"><span>input</span><span>state</span><span>nonlinearity</span><span>spikes</span><i></i><b></b></div>
+          <aside class="speaker-note"><b>Speaker note · ~60 s</b><p>End by connecting biology and computation. A model is useful when its abstraction matches the question. Our opening simulator preserved integration, leak, threshold and refractoriness, but omitted channel kinetics and morphology. Hodgkin–Huxley answers a different question. Neither is “the neuron”; each is a disciplined compression.</p></aside>
+        </article>
+
+        <nav class="deck-controls" aria-label="Presentation controls">
+          <button id="previousSlide" type="button" aria-label="Previous slide">←</button>
+          <div><span><b id="currentSlideNumber">1</b> / 10</span><strong id="currentSlideLabel">From input to spike</strong></div>
+          <button id="notesButton" type="button" aria-pressed="false">Notes</button>
+          <button id="nextSlide" type="button" aria-label="Next slide">→</button>
+          <button id="fullscreenButton" type="button" aria-label="Toggle fullscreen">⛶</button>
+        </nav>
+      </section>
+    </main>
+
+    <dialog id="referencesDialog" class="references-dialog">
+      <button class="dialog-close" id="closeReferences" type="button" aria-label="Close">×</button>
+      <p class="kicker">Selected scientific sources</p>
+      <h2>References</h2>
+      <ol class="reference-list">
+        <li id="reference-1"><b>Purves, D. et al.</b> <em>Neuroscience</em>, 2nd ed. Sinauer (2001). <a href="https://www.ncbi.nlm.nih.gov/books/NBK10799/" target="_blank" rel="noreferrer">NCBI Bookshelf ↗</a></li>
+        <li id="reference-2"><b>Hodgkin, A. L. & Huxley, A. F.</b> A quantitative description of membrane current and its application to conduction and excitation in nerve. <em>J. Physiol.</em> 117, 500–544 (1952). <a href="https://doi.org/10.1113/jphysiol.1952.sp004764" target="_blank" rel="noreferrer">DOI ↗</a></li>
+        <li id="reference-3"><b>Alberts, B. et al.</b> Ion Channels and the Electrical Properties of Membranes. <em>Molecular Biology of the Cell</em>, 4th ed. (2002). <a href="https://www.ncbi.nlm.nih.gov/books/NBK26910/" target="_blank" rel="noreferrer">NCBI Bookshelf ↗</a></li>
+        <li id="reference-4"><b>Bean, B. P.</b> The action potential in mammalian central neurons. <em>Nat. Rev. Neurosci.</em> 8, 451–465 (2007). <a href="https://doi.org/10.1038/nrn2148" target="_blank" rel="noreferrer">DOI ↗</a></li>
+        <li id="reference-5"><b>Debanne, D. et al.</b> Axon physiology. <em>Physiol. Rev.</em> 91, 555–602 (2011). <a href="https://doi.org/10.1152/physrev.00048.2009" target="_blank" rel="noreferrer">DOI ↗</a></li>
+        <li id="reference-6"><b>Lubetzki, C., Sol-Foulon, N. & Desmazières, A.</b> Nodes of Ranvier during development and repair in the CNS. <em>Nat. Rev. Neurol.</em> 16, 426–439 (2020). <a href="https://doi.org/10.1038/s41582-020-0375-x" target="_blank" rel="noreferrer">DOI ↗</a></li>
+        <li id="reference-7"><b>Südhof, T. C.</b> Neurotransmitter release: the last millisecond in the life of a synaptic vesicle. <em>Neuron</em> 80, 675–690 (2013). <a href="https://doi.org/10.1016/j.neuron.2013.10.022" target="_blank" rel="noreferrer">DOI ↗</a></li>
+        <li id="reference-8"><b>Buzsáki, G., Anastassiou, C. A. & Koch, C.</b> The origin of extracellular fields and currents—EEG, ECoG, LFP and spikes. <em>Nat. Rev. Neurosci.</em> 13, 407–420 (2012). <a href="https://doi.org/10.1038/nrn3241" target="_blank" rel="noreferrer">DOI ↗</a></li>
+        <li id="reference-9"><b>Grienberger, C. & Konnerth, A.</b> Imaging calcium in neurons. <em>Neuron</em> 73, 862–885 (2012). <a href="https://doi.org/10.1016/j.neuron.2012.02.011" target="_blank" rel="noreferrer">DOI ↗</a></li>
+        <li id="reference-10"><b>Dayan, P. & Abbott, L. F.</b> <em>Theoretical Neuroscience</em>. MIT Press (2001). <a href="https://mitpress.mit.edu/9780262541855/theoretical-neuroscience/" target="_blank" rel="noreferrer">Publisher ↗</a></li>
+        <li id="reference-11"><b>Panzeri, S. et al.</b> The structures and functions of correlations in neural population codes. <em>Nat. Rev. Neurosci.</em> 23, 551–567 (2022). <a href="https://doi.org/10.1038/s41583-022-00606-4" target="_blank" rel="noreferrer">DOI ↗</a></li>
+      </ol>
+      <p class="reference-note">The presentation uses original diagrams and simulations; it does not reproduce figures from these sources.</p>
+    </dialog>
+
+    <dialog id="aboutDialog">
+      <button class="dialog-close" id="closeAbout" type="button" aria-label="Close">×</button>
+      <p class="kicker">About this project</p>
+      <h2>A neuron, made explorable.</h2>
+      <p>This independent educational project accompanies a ten-minute presentation on what a neuron is, how it works, and what neuroscientists mean by neural activity.</p>
+      <p>The interactive lab is a conceptual leaky integrate-and-fire model. Its spike waveform and propagation animation are explanatory graphics, not a numerical Hodgkin–Huxley simulation or medical tool.</p>
+      <p>No response or interaction data leaves the browser.</p>
+    </dialog>
+
+    <div class="popover" id="popover" role="dialog" aria-modal="false" hidden><button id="closePopover" type="button" aria-label="Close">×</button><div id="popoverContent"></div></div>
+
+    <noscript>This interactive presentation requires JavaScript.</noscript>
+    <script type="module" src="app.js?v=20260930.1"></script>
+  </body>
+</html>
